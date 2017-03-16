@@ -49,8 +49,6 @@ public class MapGenerator : MonoBehaviour {
 
         foreach (ActiveMapClass map in ActiveMaps) {
 
-            // Fix le sort() plus bas : done-ish ?
-
             for (; map.SpawnZ + map.offset.z < Player.transform.position.z + GlobalSettings.SpawnZone; map.SpawnZ++)
             {
                 if (map.MapLayers.ContainsKey(map.SpawnZ))

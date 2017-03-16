@@ -2,6 +2,18 @@
 using System.Collections;
 using System.Collections.Generic;
 
+/* blah blah todo
+ * 
+ * List of cool features to add :
+ * Pads to do stuff (jump/acceleration/...)
+ * Actual usable items
+ * Passive upgrades
+ * Stuff taht follows player's X for a certain time, then tries to crush him/pop in front of him
+ * Rogue-like talent tree maybe ?
+ * More complex obstacles (Events !), like floating stairs, lot of crushing stuff at once...
+ * 
+*/
+
 // Separate code between the actual controller getting the inputs & the controller doing the physics stuff & the rest because it's getting messy
 
 public class PlayerController : MonoBehaviour
@@ -263,13 +275,6 @@ public class PlayerController : MonoBehaviour
 
     void OnCollisionEnter(Collision c)
     {
-        /*float impact;
-
-        if ((impact = Mathf.Abs(c.impulse.z) - (Mathf.Abs(c.impulse.x) + Mathf.Abs(c.impulse.y))) > GlobalSettings.CollisionTolerance) //needs some work
-        {
-            Debug.LogWarning("You're pretty dead");
-        }
-        */
 
         if (c.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {

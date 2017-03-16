@@ -57,7 +57,7 @@ public class CrushingPoolableObject : GenericPoolableObject {
 
     protected void FallPhysics(float targetHeight)
     {
-
+        //Throw the fucker down and have it NOT bouncing
     }
 
     protected void FallNoPhysics(float targetHeight)
@@ -87,13 +87,7 @@ public class CrushingPoolableObject : GenericPoolableObject {
             {
                 if (c.gameObject.name != name)
                 {
-                    // List of cool features to add :
-                    // Pads to do stuff (jump/acceleration/...)
-                    // Actual usable items
-                    // Passive upgrades
-                    // Stuff taht follows player's X for a certain time, then tries to crush him/pop in front of him
-                    // Rogue-like talent tree maybe ?
-                    // More complex obstacles (Events !), like floating stairs, lot of crushing stuff at once...
+
 
                     goodCollision = true;
                     Quake();
