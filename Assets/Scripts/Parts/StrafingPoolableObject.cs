@@ -23,7 +23,7 @@ public class StrafingPoolableObject : GenericPoolableObject {
         base.FixedUpdate();
 
         if (rb.velocity.x < force) // To change to some proper stuff, works for now
-            rb.AddForce(direction, ForceMode.Force);
+            rb.AddForce(direction, ForceMode.Acceleration);
 
         if (Mathf.Abs(rb.velocity.x) < 0.1f && lastDirectionChange > 3.0f)
         {
