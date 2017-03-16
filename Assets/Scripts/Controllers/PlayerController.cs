@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-// Separate code between the actual controller getting the inputs & the controller doing the physics stuff
+// Separate code between the actual controller getting the inputs & the controller doing the physics stuff & the rest because it's getting messy
 
 public class PlayerController : MonoBehaviour
 {
@@ -119,7 +119,7 @@ public class PlayerController : MonoBehaviour
             Die(EDeathCause.LOWSPEED, "Velocity's too low, you dun goofed");
             warned = true;
         }
-        else if (rb.velocity.z > 23)
+        else if (rb.velocity.z > 23) // tis magic
         {
             warned = false;
         }
@@ -127,7 +127,6 @@ public class PlayerController : MonoBehaviour
 
     // The problem is when you come diagonally so the raycast start point is already inside the collided object 
     // Solution is multiple raycasts.
-    // Other unrelated bug : you get a double jump when wallriding with a positive y velocity
     Vector3 Displacement(Vector3 input)
     {
         RaycastHit hit;
@@ -146,7 +145,7 @@ public class PlayerController : MonoBehaviour
         foreach (Vector3 startingPoint in startingPoints)
         {
             Debug.DrawRay(startingPoint, new Vector3(XValue, 0, 0), Color.red);
-            if (Physics.Raycast(startingPoint, new Vector3(XValue, 0, 0), out hit, Mathf.Abs(XValue), layerMask) && hit.transform.tag != "P-Layer")
+            if (Physics.Raycast(startingPoint, new Vector3(XValue, 0, 0), out hit, Mathf.Abs(XValue), layerMask))
             {
                 Vector3 newPos = hit.point;
 
@@ -284,7 +283,7 @@ public class PlayerController : MonoBehaviour
             Vector3 p = transform.InverseTransformPoint(cont.point);
 
             // Landing on smth
-            if (p.y < 0)
+            if (p.y < -0.3)
             {
                 JumpList.AddFirst(c.gameObject);
                 ResetJump();                
