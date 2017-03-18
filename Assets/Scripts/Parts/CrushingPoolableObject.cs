@@ -5,6 +5,7 @@ using System.Collections;
 public class CrushingPoolableObject : GenericPoolableObject {
 
     bool isFalling;
+    public bool isFallingPhysicly;
     bool hasCollided = false;
 
     Rigidbody rb;
@@ -26,7 +27,7 @@ public class CrushingPoolableObject : GenericPoolableObject {
         isFalling = false;
         DelayedStart = Random.Range(0.0f, Mathf.PI * 2);
         TimeModifier = Random.Range(0.5f, 1.5f);
-
+        isFallingPhysicly = true;
     }
 
     protected override void FixedUpdate()
@@ -51,13 +52,37 @@ public class CrushingPoolableObject : GenericPoolableObject {
 
         if (isFalling && !hasCollided && transform.position.y > targetHeight)
         {
-            FallNoPhysics(targetHeight); // REPLACE BY SOMETHING THAT CAN HANDLE INTERPOLATION (It'll be unity physics coz u too lazy to do your own)
+            if (!isFallingPhysicly)
+                FallNoPhysics(targetHeight);
+            else
+            {
+                rb.isKinematic = false;
+                FallPhysics(targetHeight);
+            }
         }
+    }
+
+    protected void Land(float fall)
+    {
+        rb.isKinematic = false;
+        float newMass = transform.localScale.x + transform.localScale.y + transform.localScale.z;
+
+        rb.mass = newMass * newMass * newMass;
+        rb.drag = 1;
+
+        rb.AddForce(new Vector3(0, -fall * newMass, 0), ForceMode.VelocityChange);
+
+        hasCollided = true;
     }
 
     protected void FallPhysics(float targetHeight)
     {
-        //Throw the fucker down and have it NOT bouncing
+        Vector3 fall = Vector3.zero;
+        FallTicks += 10;
+
+        fall.y = GlobalSettings.FallingSpeed * (Mathf.Pow(GlobalSettings.CrushingAcceleration, 4) * FallTicks);
+
+        rb.AddForce(-fall, ForceMode.Acceleration);
     }
 
     protected void FallNoPhysics(float targetHeight)
@@ -87,8 +112,6 @@ public class CrushingPoolableObject : GenericPoolableObject {
             {
                 if (c.gameObject.name != name)
                 {
-
-
                     goodCollision = true;
                     Quake();
                 }
@@ -96,15 +119,7 @@ public class CrushingPoolableObject : GenericPoolableObject {
 
             if (goodCollision)
             {
-                rb.isKinematic = false;
-                float newMass = transform.localScale.x + transform.localScale.y + transform.localScale.z;
-
-                rb.mass = newMass * newMass;
-                rb.drag = 1;
-
-                rb.AddForce(new Vector3(0, -fall * newMass, 0), ForceMode.VelocityChange);
-
-                hasCollided = true;
+                Land(fall);
             }
         }
 
@@ -153,5 +168,16 @@ public class CrushingPoolableObject : GenericPoolableObject {
         }
 
         isFalling = false;
+    }
+
+    void OnCollisionEnter()
+    {
+        if (!hasCollided && isFallingPhysicly && isFalling)
+        {
+            rb.velocity = Vector3.zero;
+            rb.rotation = Quaternion.identity;
+            Quake();
+            Land(0.0f);
+        }
     }
 }
