@@ -45,7 +45,13 @@ public class MapGenerator : MonoBehaviour {
 
     protected virtual void Update()
     {
-        // THIS SUCKS BIG TIME, PLS NO LOOKERINO
+        /*
+         * Rather than doing that, you can just calculate what are the new "active" tiles since the last call and lookup these ones 
+         * 
+         * 
+         * 
+         * 
+         */
 
         foreach (ActiveMapClass map in ActiveMaps) {
 

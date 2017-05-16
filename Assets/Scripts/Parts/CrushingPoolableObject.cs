@@ -174,10 +174,10 @@ public class CrushingPoolableObject : GenericPoolableObject {
     {
         if (!hasCollided && isFallingPhysicly && isFalling)
         {
+            Land(-rb.velocity.y / 10); // gives satisfying results
             rb.velocity = Vector3.zero;
             rb.rotation = Quaternion.identity;
             Quake();
-            Land(0.0f);
         }
     }
 }
