@@ -82,12 +82,14 @@ public class MapGenerator : MonoBehaviour {
             ActiveMaps.Remove(del);
         }
 
+        /*
         if (Input.GetKeyDown(KeyCode.T))
         {
             Map map = GenerateMap(10, 10);
 
             Test(map); // Testing is VERY resource/time consuming for now, since i do everything in a single block without multithreading & other fancy things, SO DONT SPAM IT
         }
+        */
     }
 
     public void LoadActiveMap(Map map, bool isWrapping = false)
@@ -143,6 +145,8 @@ public class MapGenerator : MonoBehaviour {
 
         ActiveMaps.AddLast(newActiveMapClass);
 
+        Debug.Log("New active map loaded : total = " + ActiveMaps.Count);
+
         // DO the requirement thing to load enough objects
 
     }
@@ -154,7 +158,7 @@ public class MapGenerator : MonoBehaviour {
     }
 
     // DONT USE LOL
-    public virtual Map GenerateMap(int x, int y)
+    public virtual Map GenerateMap(int x, int y, float density = 1)
     {
         // Cool part starts here
         // Cellular automata & shit

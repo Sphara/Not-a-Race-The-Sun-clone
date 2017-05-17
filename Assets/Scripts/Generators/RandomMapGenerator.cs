@@ -1,21 +1,20 @@
 ﻿using UnityEngine;
+using System.Linq;
 using System.Collections.Generic;
 
 public class RandomMapGenerator : MapGenerator
 {
-    private List<string> Parts;
+    private List<string> PartsA; // The majority of the objects
+    private List<string> PartsB; // The things you can't use too much (like ramps)
     private Dictionary<string, InformationHolder> InfoDic;
-
-    // WE WERE HERE
-
-    // Get a better algorithm to get the spawns
 
     protected override void Start()
     {
         base.Start();
 
         InfoDic = new Dictionary<string, InformationHolder>();
-        Parts = new List<string>() { "Thwomp", "RaisingObject", "Ramp", "Pyramid", "MovingCube" };
+        PartsA = new List<string>() { "Thwomp", "RaisingObject", "Pyramid", "MovingCube" };
+        PartsB = new List<string>() { "Ramp" };
 
         InfoDic.Add("Ramp", new InformationHolder(0.5f, Vector3.one, Vector3.one, 0, 0));
         InfoDic.Add("RaisingObject", new InformationHolder(0.5f, new Vector3(1, 1, 1), new Vector3(10, 15, 20), 0, 0));
@@ -23,8 +22,6 @@ public class RandomMapGenerator : MapGenerator
         InfoDic.Add("Pyramid", new InformationHolder(0.0f, new Vector3(1, 1, 1), new Vector3(10, 25, 10), 0, 360));
         InfoDic.Add("MovingCube", new InformationHolder(0.0f, new Vector3(3, 3, 3), new Vector3(10, 10, 10), 0, 0));
 
-        Map map = GenerateMap(100, 300);
-        LoadActiveMap(map, new Vector3(-50, 0, 25));
     }
 
     protected override void Update()
@@ -33,7 +30,7 @@ public class RandomMapGenerator : MapGenerator
 
         if (ActiveMaps.Count == 0)
         {
-            Map map = GenerateMap(200, 300);
+            Map map = GenerateMap(200, 300, 1);
             Vector3 newOffset = new Vector3(-50, 0, 100 + GlobalSettings.SpawnZone) + Player.position;
             newOffset.y = 0.0f;
 
@@ -53,36 +50,73 @@ public class RandomMapGenerator : MapGenerator
     /*
      * Type A : Raising, thwomp, pyramid, movingCube 
      * 
-     * Type B : Ramp
+     * Type B : Ramp = (add trampoline ?)
      * 
      * Change to : 3 configurations :
-     * - 40% of 1 A, others A + B are equally distributed
-     * - 25% of two A, then same as first configuration
+     * - 50% of 1 A, others A + B are equally distributed
+     * - 30% of two A, then same as first configuration
      * - All A + B equally distributed
      */
 
-    public override Map GenerateMap(int x, int y)
+    // density should be between like 0 and 1ish (but hey, you do you, fry your computer as much as you like)
+    public override Map GenerateMap(int x, int y, float density)
     {
+
         Map map = new Map();
 
-        // Replace from here
-        int available = (x * y) / 200;
+        PartsA.Shuffle();
+        PartsB.Shuffle();
 
-        Parts.Shuffle();
+        List<string> TotalParts = PartsA;
+        TotalParts.AddRange(PartsB);
 
-        foreach (string s in Parts)
+        List<int> Configuration = new List<int>();
+
+        switch (Random.Range(0, 3))
         {
-            int nbr = Random.Range(0, available);
-            available -= nbr;
+            case 0:
 
-            while (nbr > 0)
-            {
-                PopPart(map, s, x, y);
-                nbr--;
+                Configuration.Add(50);
+
+                for (int i = 1; i < TotalParts.Count; i++)
+                {
+                    Configuration.Add(50 / (TotalParts.Count - 1));
+                }
+
+                break;
+
+            case 1:
+
+                Configuration.Add(30);
+                Configuration.Add(30);
+
+                for (int i = 2; i < TotalParts.Count; i++)
+                {
+                    Configuration.Add(40 / (TotalParts.Count - 2));
+                }
+
+                break;
+
+            case 2:
+
+                for (int i = 0; i < TotalParts.Count; i++)
+                {
+                    Configuration.Add(100 / TotalParts.Count);
+                }
+
+                break;
+
+            default:
+                break;
+        }
+        
+        for (int i = 0; i < Mathf.Min(TotalParts.Count, Configuration.Count); i++) // Trust nobody, not even yourself
+        {
+            Debug.Log((((float)Configuration[i] / 100.0f) * x * y * ((float)density / 100.0f)));
+            for (int nbr = 0;  nbr < (((float)Configuration[i] / 100.0f) * x * y * ((float)density / 100.0f)); nbr++) {
+                PopPart(map, TotalParts[i], x, y);
             }
         }
-
-        // To there
 
         return map;
     }
