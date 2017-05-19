@@ -1,12 +1,25 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+// Next thing : have a list of function per pool that are applied at new object creation
+
 public class PoolableObject : MonoBehaviour {
 
     GenericPoolableObject mObj;
 
+    // blah blah getters setters at some point i was doing things here and i might do it again so this'll stay like that
     public void SetObject(GenericPoolableObject obj) {
         mObj = obj;
+    }
+
+    public GenericPoolableObject GetPoolableObject()
+    {
+        return mObj;
+    }
+
+    public GameObject GetGameObject()
+    {
+        return mObj.gameObject;
     }
 
     public GameObject Spawn(Vector3 position, Quaternion rotation, Vector3 scale)
@@ -233,6 +246,30 @@ public class _Pool {
         return iNumberOfFreeObjects;
     }
 
+    public List<GenericPoolableObject> GetPoolableObjects()
+    {
+        List<GenericPoolableObject> list = new List<GenericPoolableObject>();
+
+        for (int i = 0; i < mPoolableObjects.Count; i++)
+        {
+            list.Add(mPoolableObjects[i].GetPoolableObject());
+        }
+
+        return list;
+    }
+
+    public List<GameObject> GetGameObjects()
+    {
+        List<GameObject> list = new List<GameObject>();
+
+        for (int i = 0; i < mPoolableObjects.Count; i++)
+        {
+            list.Add(mPoolableObjects[i].GetGameObject());
+        }
+
+        return list;
+    }
+
     List<PoolableObject> GetAvailableObjects()
     {
         List<PoolableObject> list = new List<PoolableObject>();
@@ -366,6 +403,28 @@ public static class Pool
         }
 
         return sPoolDictionary[name].Expand(quantity);
+    }
+
+    public static List<GameObject> GetGameObjects(string name)
+    {
+        if (!sPoolDictionary.ContainsKey(name))
+        {
+            Debug.LogWarning("(GetObjects) Invalid pool name used :" + name);
+            return null;
+        }
+
+        return sPoolDictionary[name].GetGameObjects();
+    }
+
+    public static List<GenericPoolableObject> GetGenericObjects(string name)
+    {
+        if (!sPoolDictionary.ContainsKey(name))
+        {
+            Debug.LogWarning("(GetObjects) Invalid pool name used :" + name);
+            return null;
+        }
+
+        return sPoolDictionary[name].GetPoolableObjects();
     }
 
     public static void Reset()

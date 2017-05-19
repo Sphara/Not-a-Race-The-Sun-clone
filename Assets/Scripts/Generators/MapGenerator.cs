@@ -25,9 +25,14 @@ public class MapGenerator : MonoBehaviour {
 
     public Rigidbody Player;
 
-    protected LinkedList<ActiveMapClass> ActiveMaps;
-    private List<ActiveMapClass> ToDelete;
+    public BuffGenerator BuffSpawner;
 
+    protected LinkedList<ActiveMapClass> ActiveMaps;
+    protected List<ActiveMapClass> ToDelete;
+
+    protected List<string> PartsA; // The majority of the objects
+    protected List<string> PartsB; // The things you can't use too much (like ramps)
+    protected Dictionary<string, InformationHolder> InfoDic;
 
     protected virtual void Start()
     {
@@ -41,6 +46,16 @@ public class MapGenerator : MonoBehaviour {
 
         ActiveMaps = new LinkedList<ActiveMapClass>();
         ToDelete = new List<ActiveMapClass>();
+
+        InfoDic = new Dictionary<string, InformationHolder>();
+        PartsA = new List<string>() { "Thwomp", "RaisingObject", "Pyramid", "MovingCube" };
+        PartsB = new List<string>() { "Ramp" };
+
+        InfoDic.Add("Ramp", new InformationHolder(0.5f, Vector3.one, Vector3.one, 0, 0));
+        InfoDic.Add("RaisingObject", new InformationHolder(0.5f, new Vector3(1, 1, 1), new Vector3(10, 15, 20), 0, 0));
+        InfoDic.Add("Thwomp", new InformationHolder(0.5f, new Vector3(1, 1, 1), new Vector3(10, 15, 20), 0, 0));
+        InfoDic.Add("Pyramid", new InformationHolder(0.0f, new Vector3(1, 1, 1), new Vector3(10, 25, 10), 0, 360));
+        InfoDic.Add("MovingCube", new InformationHolder(0.0f, new Vector3(3, 3, 3), new Vector3(10, 10, 10), 0, 0));
     }
 
     protected virtual void Update()
@@ -160,10 +175,6 @@ public class MapGenerator : MonoBehaviour {
     // DONT USE LOL
     public virtual Map GenerateMap(int x, int y, float density = 1)
     {
-        // Cool part starts here
-        // Cellular automata & shit
-        // Patterns r cool
-
         Map map = new Map();
 
         for (int i = 0; i < x; i++)
@@ -214,7 +225,7 @@ public class MapGenerator : MonoBehaviour {
 
         if (!File.Exists(mapPath))
         {
-            Debug.LogWarning("Requasted map " + name + " does not exist");
+            Debug.LogWarning("Requested map " + name + " does not exist");
             return null;
         }
 
@@ -229,6 +240,34 @@ public class MapGenerator : MonoBehaviour {
         xdr.Close();
 
         return map;
+    }
+
+    /// <summary>
+    ///  Pop a part at a random place in the map
+    /// </summary>
+    /// <param name="map">The map</param>
+    /// <param name="s">The name of the part (retrieved in infoDic)</param>
+    /// <param name="x">Max X range (min is 0)</param>
+    /// <param name="y">Max Y range (min is 0)</param>
+    ///
+    public virtual void AddPartAtRandomPlace(Map map, string s, int x, int y)
+    {
+        Vector3 position = new Vector3(Random.Range(0, x), InfoDic[s].YPosition, Random.Range(0, y));
+        Vector3 scale = new Vector3(Random.Range(InfoDic[s].minScale.x, InfoDic[s].maxScale.x), Random.Range(InfoDic[s].minScale.y, InfoDic[s].maxScale.y), Random.Range(InfoDic[s].minScale.z, InfoDic[s].maxScale.z));
+        Quaternion rotation = Quaternion.Euler(0, Random.Range(InfoDic[s].minRotation, InfoDic[s].maxRotation), 0);
+
+        // Change to something else when there are more noScaleRotation items (rn there are just ramps)
+        map.AddItem(new MapEntry(s, position, rotation, scale, s == "Ramp" ? true : false));
+    }
+
+    public virtual void AddPart(Map map, string s, Vector3 position)
+    {
+        // Maybe override position.y with InfoDic[s].Yposition ?
+        Vector3 scale = new Vector3(Random.Range(InfoDic[s].minScale.x, InfoDic[s].maxScale.x), Random.Range(InfoDic[s].minScale.y, InfoDic[s].maxScale.y), Random.Range(InfoDic[s].minScale.z, InfoDic[s].maxScale.z));
+        Quaternion rotation = Quaternion.Euler(0, Random.Range(InfoDic[s].minRotation, InfoDic[s].maxRotation), 0);
+
+        // Same as in AddPartAtRandomPlace
+        map.AddItem(new MapEntry(s, position, rotation, scale, s == "Ramp" ? true : false));
     }
 
     public bool Test(Map map)
@@ -287,6 +326,23 @@ public class MapGenerator : MonoBehaviour {
             size = _size;
             SpawnZ = 0;
             isWrapping = _isWrapping;
+        }
+    }
+
+    // Describes 1 item on the map
+    public struct InformationHolder
+    {
+        public float YPosition;
+        public Vector3 minScale, maxScale;
+        public float minRotation, maxRotation;
+
+        public InformationHolder(float _y, Vector3 _minScale, Vector3 _maxScale, float _minRotation, float _maxRotation)
+        {
+            YPosition = _y;
+            minScale = _minScale;
+            maxScale = _maxScale;
+            minRotation = _minRotation;
+            maxRotation = _maxRotation;
         }
     }
 }

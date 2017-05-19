@@ -21,14 +21,17 @@ public class MapEntry {
     [DataMember(Name = "SCALE", Order = 4)]
     float[] scale;
 
+    [DataMember(Name = "noScaleRotation", Order = 5)]
+    bool noScaleRotation;
+
     public void Spawn(Vector3 BasePosition)
     {
-        // I WILL REMOVE THAT AFTER THE DEMO WHEN I FIND A CORRECT WAY TO DO IT (Hi steven, please disregard that, nothing to see here)
-        if (name == "Ramp")
+        // Yeah, i'll change stuff in here later
+        if (noScaleRotation)
         {
             Pool.Spawn(name, BasePosition + GetPosition());
         }
-            else
+        else
         {
             Pool.Spawn(name, BasePosition + GetPosition(), GetRotation(), GetScale());
         }
@@ -40,7 +43,7 @@ public class MapEntry {
         Spawn(Vector3.zero);
     }
 
-    public MapEntry(string _name, Vector3 _position, Quaternion _rotation, Vector3 _scale)
+    public MapEntry(string _name, Vector3 _position, Quaternion _rotation, Vector3 _scale, bool _noScaleRotation = false)
     {
         name = _name;
 
@@ -49,6 +52,8 @@ public class MapEntry {
         rotation = new float[4] {_rotation.x, _rotation.y, _rotation.z, _rotation.w};
 
         scale = new float[3] {_scale.x, _scale.y, _scale.z};
+
+        noScaleRotation = _noScaleRotation;
     }
 
     public override string ToString()
